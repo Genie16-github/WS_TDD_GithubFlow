@@ -117,6 +117,53 @@ public class AppTests {
 
     }
 
+    @Test
+    @DisplayName("명언을 삭제할 수 있다.")
+    public void t8() {
+        String rs = AppTestRunner.run("""
+                등록
+                나의 죽음을 적들에게 알리지 마라
+                이순신
+                등록
+                나에게 불가능이란 없다.
+                나폴레옹
+                삭제?id=1
+                목록
+                삭제?id=1
+                종료
+                """);
+
+        assertThat(rs)
+                .contains("1번 명언이 삭제되었습니다.")
+                .contains("2 / 나폴레옹 / 나에게 불가능이란 없다.")
+                .doesNotContain("1 / 이순신 / 나의 죽음을 적들에게 알리지 마라")
+                .contains("1번 명언은 존재하지 않습니다.");
+
+    }
+
+    @Test
+    @DisplayName("명언을 수정할 수 있다.")
+    public void t9() {
+        String rs = AppTestRunner.run("""
+                등록
+                나의 죽음을 적들에게 알리지 마라
+                이순신
+                등록
+                나에게 불가능이란 없다.
+                나폴레옹
+                목록
+                수정?id=1
+                나의 죽음을 적들에게 알리지 마라!
+                이순신장군
+                목록
+                종료
+                """);
+
+        assertThat(rs).contains("1 / 이순신 / 나의 죽음을 적들에게 알리지 마라");
+        assertThat(rs).contains("1 / 이순신장군 / 나의 죽음을 적들에게 알리지 마라!");
+
+    }
+
     // 앱 테스트 끝
 
 
