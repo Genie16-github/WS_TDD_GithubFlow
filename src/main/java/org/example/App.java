@@ -5,29 +5,31 @@ import java.util.List;
 import java.util.Scanner;
 
 public class App {
-    private final Scanner sc;
+    private Scanner sc;
+    int wiseSayingsLastId;
+    List<WiseSaying> wiseSayings;
 
     public App(Scanner sc) {
         this.sc = sc;
+        wiseSayingsLastId = 0;
+        wiseSayings = new ArrayList<>();
     }
 
     public void run() {
         System.out.println("== 명언 앱 ==");
 
-        long wiseSayingsLastId = 0;
-        List<WiseSaying> wiseSayings = new ArrayList<>();
-
         while (true) {
             System.out.print("명령) ");
             String cmd = sc.nextLine().trim();
+            Request rq = new Request(cmd);
 
-            switch (cmd) {
+            switch (rq.getPath()) {
                 case "종료" -> {
                     System.out.println("프로그램이 종료되었습니다.");
                     return;
                 }
                 case "등록" -> {
-                    long id = ++wiseSayingsLastId;
+                    int id = ++wiseSayingsLastId;
                     System.out.print("명언 : ");
                     String content = sc.nextLine();
                     System.out.print("작가 : ");
@@ -44,8 +46,70 @@ public class App {
                         System.out.printf("%d / %s / %s\n", wiseSaying.id, wiseSaying.author, wiseSaying.content);
                     }
                 }
-                default -> System.out.printf("`%s`(은)는 올바르지 않은 명령입니다.\n", cmd);
+                case "삭제" -> remove(rq);
+                case "수정" -> modify(rq);
+                default -> {
+                    System.out.printf("`%s`(은)는 올바르지 않은 명령입니다.\n", cmd);
+                    break;
+                }
             }
         }
+    }
+
+    private void modify(Request rq) {
+        long id = rq.getLongParam("id", 0);
+
+        if (id == 0) {
+            System.out.println("번호를 입력해주세요.");
+            return;
+        }
+
+        WiseSaying wiseSaying = findById(id);
+
+        if (wiseSaying == null) {
+            System.out.printf("%d번 명언은 존재하지 않습니다.\n", id);
+            return;
+        }
+
+        System.out.printf("명언(기존) : %s\n", wiseSaying.content);
+        System.out.print("명언 : ");
+        String content = sc.nextLine();
+
+        System.out.printf("작가(기존) : %s\n", wiseSaying.author);
+        System.out.print("작가 : ");
+        String author = sc.nextLine();
+
+        wiseSaying.content = content;
+        wiseSaying.author = author;
+    }
+
+    private void remove(Request rq) {
+        long id = rq.getLongParam("id", 0);
+
+        if (id == 0) {
+            System.out.println("번호를 입력해주세요.");
+            return;
+        }
+
+        WiseSaying wiseSaying = findById(id);
+
+        if (wiseSaying == null) {
+            System.out.printf("%d번 명언은 존재하지 않습니다.\n", id);
+            return;
+        }
+
+        wiseSayings.remove(wiseSaying);
+
+        System.out.printf("%d번 명언이 삭제되었습니다.\n", id);
+    }
+
+    private WiseSaying findById(long id) {
+        for (WiseSaying wiseSaying : wiseSayings) {
+            if (wiseSaying.id == id) {
+                return wiseSaying;
+            }
+        }
+
+        return null;
     }
 }
